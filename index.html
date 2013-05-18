@@ -5,6 +5,7 @@
     <title>Recipe Manager</title>
     <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
     <script src="js/recipe_manager.js"></script>
+    <link rel="stylesheet" type="text/css" href="css/recipe_manager.css" media="screen" />
   </head>
   <body>
     <p>Recipe Manager</p>
@@ -13,10 +14,24 @@
       <datalist id="recipe_suggest_data">
       </datalist>
     </div>
+
     <div>
       <label for="recipe_name">Recipe:</label>
       <input type="text" id="recipe_name" />
-      <ul id="ingredient_list"></ul>
+      <ul id="ingredient_list" class="sub_item_list"></ul>
     </div>
+
+    <div>
+      <label for="costs">Costs:</label>
+      <table id="costs">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Quantity</th>
+          </tr>
+        </thead>
+      </table>
+    </div>
+
   </body>
 </html>

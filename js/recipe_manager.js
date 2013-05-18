@@ -1,9 +1,11 @@
 var database = {};
 
 function loadDatabase() {
-  recipes = {"test":{ingredients:[{item:"foo", count:2, tools: []},{item:"bar", count:1, tools:[]}]},
-             "foo":{ingredients:[{item:"bar", count: 3, tools: []}]},
-             "bar":{ingredients:[]}};
+  recipes = {"a":{ingredients:[{item:"b", count: 2, tools: []},{item:"c", count:1, tools:[]}]},
+             "b":{ingredients:[{item:"c", count: 3, tools: []}, {item:"d", count: 1, tools: []}]},
+             "c":{ingredients:[{item:"d", count: 5, tools: []}]},
+             "d":{ingredients:[]}
+            };
   populateRecipes(recipes);
   return recipes;
 }
@@ -21,14 +23,12 @@ function populateRecipes(recipes) {
 
 function addIngredientItem(list, ingredient) {
   var item = $('<li class="sub_item"></li>');
-  item.append($('<span class="item_name">').append(ingredient.item.name));
-  var subItems = $('<div>');
+  item.append('<a href="#" class="item_name">'+ingredient.item.name+'</a>');
 
   if (ingredient.item.ingredients.length) {
-    subItems.append('<a href="" class="open_sub_item">+</a>')
+    item.append($('<a href="#" class="toggle_sub_item">+</a>'));
   }
-  subItems.append('<ul class="sub_item_list"></ul>');
-  item.append(subItems);
+
   list.append(item);
 }
 
@@ -41,8 +41,20 @@ function addIngredients(list, recipe) {
 function setRecipe(recipe) {
   $('input#recipe_name').val(recipe.name);
   var list = $('ul#ingredient_list');
+  list.empty();
   addIngredients(list, recipe);
+  $('ul#ingredient_list').children('li.sub_item').addClass('selected');
+  recalculateCosts();
  }
+
+function recalculateCosts() {
+  var list = $('table#costs');
+  list.children('tr');
+  list.remove();
+  var selectedItems = $('ul#ingredient_list li.sub_item.selected');
+
+  console.log(list);
+}
 
 jQuery(function() {
 
@@ -54,16 +66,40 @@ jQuery(function() {
     }
   });
 
-  $("body").on("click", "a.open_sub_item", function(event) {
+  $("body").on("click", "a.toggle_sub_item", function(event) {
     event.preventDefault();
     var self = $(this);
-    var li = $(this).closest('.sub_item');
-    var name = li.children('.item_name').text();;
-    var recipe = database[name]
-    var list = self.siblings(".sub_item_list");
-    addIngredients(list, recipe);
+    var subList = self.siblings('.sub_item_list');
+    if (subList.length) {
+    } else {
+      var list = $('<ul class="sub_item_list"></ul>');
+      var li = $(this).closest('.sub_item');
+      li.append(list);
+      var name = li.children('.item_name').text();
+      var recipe = database[name]
+      addIngredients(list, recipe);
+    }
   });
 
+  $("body").on("click", "a.item_name", function() {
+    var thisLi = $(this).closest('li.sub_item');
+    var selected_sub_items = $(this).siblings('ul.sub_item_list').find($('li.sub_item.selected'));
+    if (selected_sub_items.length) {
+      selected_sub_items.removeClass('selected');
+      thisLi.addClass('selected');
+    } else {
+      var selected_parent_item = $(this).closest('.sub_item').closest('.sub_item.selected');
+      selected_parent_item.removeClass('selected');
+      thisLi.addClass('selected');
+      var children = selected_parent_item.children('ul.sub_item_list').children('li.sub_item').not('.selected');
+      children.each(function() {
+        if (!$(this).find('li.sub_item.selected').length) {
+          $(this).addClass('selected');
+        }
+      });
+    }
+    recalculateCosts();
+  });
 
   database = loadDatabase();
   var datalist = $('datalist#recipe_suggest_data');
